@@ -55,8 +55,11 @@ MapManager::~MapManager()
 void MapManager::Initialize()
 {
     InitStateMachine();
+    sLog.outBasic("InitStateMachine is OK!");
     InitMaxInstanceId();
+    sLog.outBasic("InitMaxInstanceId is OK!");
     CreateContinents();
+    sLog.outBasic("CreateContinents is OK!");
 
     int num_threads(sWorld.getConfig(CONFIG_UINT32_NUM_MAP_THREADS));
 
@@ -71,6 +74,8 @@ void MapManager::Initialize()
 
     if (num_threads > 0)
         m_updater.activate(num_threads);
+
+    sLog.outBasic("MapManager Initialize is OK!");
 }
 
 void MapManager::InitStateMachine()
@@ -107,7 +112,7 @@ void MapManager::InitializeVisibilityDistanceInfo()
 void MapManager::CreateContinents()
 {
     std::vector<std::future<void>> futures;
-    uint32 continents[] = { 0, 1, 530 };
+    uint32 continents[] = {0,1,530};
     for (auto id : continents)
     {
         Map* m = new WorldMap(id, i_gridCleanUpDelay, 0);
@@ -117,11 +122,14 @@ void MapManager::CreateContinents()
         m->SetWeakPtr(ptr);
 
         // non-instanceable maps always expected have saved state
-        futures.push_back(std::async(std::launch::async, std::bind(&Map::Initialize, m, true)));
+        futures.push_back(std::async(std::launch::async, std::bind(&Map::Initialize, m, true)));      
     }
+    
+    sLog.outBasic("Continents are pushed");
 
-    for (auto& futurItr : futures)
-        futurItr.wait();
+    for (auto& f : futures)
+        f.wait();
+
 }
 
 /// @param id - MapId of the to be created map. @param obj WorldObject for which the map is to be created. Must be player for Instancable maps.
