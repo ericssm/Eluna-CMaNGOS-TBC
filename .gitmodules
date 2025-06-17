@@ -1,6 +1,6 @@
 [submodule "src/game/LuaEngine"]
 	path = src/game/LuaEngine
 	url = https://github.com/ElunaLuaEngine/Eluna.git
-[submodule "src/game/playerbots"]
-	path = src/game/playerbots
+[submodule "src/modules/PlayerBots"]
+	path = src/modules/PlayerBots
 	url = https://github.com/cmangos/playerbots.git

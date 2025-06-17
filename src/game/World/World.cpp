@@ -1610,6 +1610,7 @@ void World::SetInitialWorldSettings()
     ///- Initialize Outdoor PvP
     sLog.outString("Starting Outdoor PvP System");          // should be before loading maps
     sOutdoorPvPMgr.InitOutdoorPvP();
+    sLog.outString();
 
     ///- Initialize MapManager
     sLog.outString("Starting Map System");
@@ -1621,9 +1622,9 @@ void World::SetInitialWorldSettings()
     sBattleGroundMgr.CreateInitialBattleGrounds();
     m_bgQueue.InitAutomaticArenaPointDistribution();
     CheckLootTemplates_Reference(ids_set);
+    sLog.outString();
 
     sLog.outString("Deleting expired bans...");
-
     LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=" _UNIXTIME_ " AND expires_at<>banned_at");
     sLog.outString();
 
