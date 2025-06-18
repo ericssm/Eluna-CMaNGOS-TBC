@@ -1995,7 +1995,9 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
     SpellCastTargets targets;
     targets.setUnitTarget(user);
 
-    spell->SpellStart(&targets);
+    SpellCastResult result = spell->SpellStart(&targets);
+    if (result == SPELL_CAST_OK)
+        onSuccess();
 }
 
 // overwrite WorldObject function for proper name localization
