@@ -453,6 +453,9 @@ void WorldSession::HandleAddFriendOpcode(WorldPacket& recv_data)
 
     recv_data >> friendNote;
 
+    if (friendNote.size() > 200)
+        return;
+
     if (!normalizePlayerName(friendName))
         return;
 
