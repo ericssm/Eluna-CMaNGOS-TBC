@@ -2096,15 +2096,14 @@ void WorldObject::AddToWorld()
 
 #ifdef BUILD_ELUNA
     // in multistate mode, always reset Map events, then recreate the Map events procesor
-    if (!sElunaConfig->IsElunaCompatibilityMode())
-    {
-        auto& events = GetElunaEvents(m_mapId);
-        if (events)
-            events.reset();
 
-        if (Eluna* e = m_currMap->GetEluna())
-            events = std::make_unique<ElunaEventProcessor>(e, this);
-    }
+    auto& events = GetElunaEvents(m_mapId);
+    if (events)
+        events.reset();
+
+    if (Eluna* e = m_currMap->GetEluna())
+        events = std::make_unique<ElunaEventProcessor>(e, this);
+
 
     // create the World events processor
     if (Eluna* e = sWorld.GetEluna())
