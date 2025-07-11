@@ -57,13 +57,10 @@ void MapManager::Initialize()
     InitStateMachine();
     InitMaxInstanceId();
     CreateContinents();
-    
-    int num_threads(sWorld.getConfig(CONFIG_UINT32_NUM_MAP_THREADS));
 
+    int num_threads(sWorld.getConfig(CONFIG_UINT32_NUM_MAP_THREADS));
     if (num_threads > 0)
         m_updater.activate(num_threads);
-
-    sLog.outBasic("MapManager Initialize is OK!");
 }
 
 void MapManager::InitStateMachine()
@@ -110,12 +107,11 @@ void MapManager::CreateContinents()
         m->SetWeakPtr(ptr);
 
         // non-instanceable maps always expected have saved state
-        futures.push_back(std::async(std::launch::async, std::bind(&Map::Initialize, m, true)));      
+        futures.push_back(std::async(std::launch::async, std::bind(&Map::Initialize, m, true)));
     }
 
-    for (auto& f : futures)
-        f.wait();
-
+    for (auto& futurItr : futures)
+        futurItr.wait();
 }
 
 /// @param id - MapId of the to be created map. @param obj WorldObject for which the map is to be created. Must be player for Instancable maps.
@@ -415,7 +411,7 @@ BattleGroundMap* MapManager::CreateBattleGroundMap(uint32 id, uint32 InstanceId,
     return map;
 }
 
-void MapManager::DoForAllMapsWithMapId(uint32 mapId, std::function<void(Map*)> worker)
+void MapManager::DoForAllMapsWithMapId(uint32 mapId, const std::function<void(Map*)> worker)
 {
     MapMapType::const_iterator start = i_maps.lower_bound(MapID(mapId, 0));
     MapMapType::const_iterator end = i_maps.lower_bound(MapID(mapId + 1, 0));

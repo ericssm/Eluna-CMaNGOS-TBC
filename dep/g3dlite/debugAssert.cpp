@@ -102,8 +102,6 @@ static void createErrorMessage(
         LPTSTR realLastErr;
         if (NULL != formatMsg) {
             realLastErr = formatMsg;
-        } else {
-            realLastErr = _T("Last error code does not exist.");
         }
 
 		if (lastErr != 0) {
