@@ -99,9 +99,11 @@ static void createErrorMessage(
         }
 
         // Make sure the message got translated into something.
-        LPTSTR realLastErr;
+        LPCSTR realLastErr;
         if (NULL != formatMsg) {
             realLastErr = formatMsg;
+        } else {
+            realLastErr = _T("Last error code does not exist.");
         }
 
 		if (lastErr != 0) {
