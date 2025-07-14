@@ -240,7 +240,7 @@ class ChatHandler
         bool HandleCharacterDeletedDeleteCommand(char* args);
         bool HandleCharacterDeletedListCommand(char* args);
         bool HandleCharacterDeletedRestoreCommand(char* args);
-        bool HandleCharacterDeletedOldCommand(char* args);
+        bool HandleCharacterDeletedOldCommand(char* args) const;
         bool HandleCharacterEraseCommand(char* args);
         bool HandleCharacterLevelCommand(char* args);
         bool HandleCharacterRenameCommand(char* args);

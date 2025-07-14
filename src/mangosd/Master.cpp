@@ -60,10 +60,10 @@ volatile bool Master::m_canBeKilled = false;
 class FreezeDetectorRunnable : public MaNGOS::Runnable
 {
     public:
-        FreezeDetectorRunnable() { _delaytime = 0; }
-        uint32 m_loops, m_lastchange;
-        uint32 w_loops, w_lastchange;
+        uint32 m_loops = 0 , m_lastchange = 0;
+        uint32 w_loops = 0, w_lastchange = 0;
         uint32 _delaytime;
+        FreezeDetectorRunnable() { _delaytime = 0; }
         void SetDelayTime(uint32 t) { _delaytime = t; }
         void run(void)
         {

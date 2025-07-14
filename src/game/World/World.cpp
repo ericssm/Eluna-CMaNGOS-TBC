@@ -154,7 +154,7 @@ World::~World()
     // it is assumed that no other thread is accessing this data when the destructor is called.  therefore, no locks are necessary
 
     ///- Empty the kicked session set
-    for (auto const session : m_sessions)
+    for (auto const& session : m_sessions)
         delete session.second;
 
     for (auto const cliCommand : m_cliCommandQueue)
@@ -629,7 +629,7 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_UPTIME_UPDATE, "UpdateUptimeInterval", 10);
     if (reload)
     {
-        m_timers[WUPDATE_UPTIME].SetInterval(getConfig(CONFIG_UINT32_UPTIME_UPDATE)*MINUTE * IN_MILLISECONDS);
+        m_timers[WUPDATE_UPTIME].SetInterval(static_cast<time_t>(getConfig(CONFIG_UINT32_UPTIME_UPDATE)) * MINUTE * IN_MILLISECONDS);
         m_timers[WUPDATE_UPTIME].Reset();
     }
 
@@ -1537,17 +1537,6 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading GM tickets...");
     sTicketMgr.LoadGMTickets();
 
-#ifdef BUILD_ELUNA
-    if (sElunaConfig->IsElunaEnabled())
-    {
-        ///- Run eluna scripts.
-        sLog.outString("Starting Eluna world state...");
-        // use map id -1 for the global Eluna state
-        eluna = std::make_unique<Eluna>(nullptr);
-        sLog.outString();
-    }
-#endif
-
     ///- Load and initialize EventAI Scripts
     sLog.outString("Loading CreatureEventAI Summons...");
     sEventAIMgr.LoadCreatureEventAI_Summons(false);         // false, will checked in LoadCreatureEventAI_Scripts
@@ -1582,15 +1571,15 @@ void World::SetInitialWorldSettings()
     LoginDatabase.PExecute("INSERT INTO uptime (realmid, starttime, startstring, uptime) VALUES('%u', " UI64FMTD ", '%s', 0)",
                            realmID, uint64(m_startTime), isoDate);
 
-    m_timers[WUPDATE_AUCTIONS].SetInterval(MINUTE * IN_MILLISECONDS);
-    m_timers[WUPDATE_UPTIME].SetInterval(getConfig(CONFIG_UINT32_UPTIME_UPDATE)*MINUTE * IN_MILLISECONDS);
+    m_timers[WUPDATE_AUCTIONS].SetInterval(static_cast<time_t>(MINUTE)* IN_MILLISECONDS);
+    m_timers[WUPDATE_UPTIME].SetInterval(static_cast<time_t>(getConfig(CONFIG_UINT32_UPTIME_UPDATE))* MINUTE* IN_MILLISECONDS);
     // Update "uptime" table based on configuration entry in minutes.
-    m_timers[WUPDATE_CORPSES].SetInterval(20 * MINUTE * IN_MILLISECONDS);
-    m_timers[WUPDATE_DELETECHARS].SetInterval(DAY * IN_MILLISECONDS); // check for chars to delete every day
+    m_timers[WUPDATE_CORPSES].SetInterval(static_cast<time_t>(20 * MINUTE)* IN_MILLISECONDS);
+    m_timers[WUPDATE_DELETECHARS].SetInterval(static_cast<time_t>(DAY)* IN_MILLISECONDS); // check for chars to delete every day
 
 #ifdef BUILD_AHBOT
     // for AhBot
-    m_timers[WUPDATE_AHBOT].SetInterval(20 * IN_MILLISECONDS); // every 20 sec
+    m_timers[WUPDATE_AHBOT].SetInterval(static_cast<time_t>(20)* IN_MILLISECONDS); // every 20 sec
 #endif
 
     // Update groups with offline leader after delay in seconds
@@ -1599,9 +1588,9 @@ void World::SetInitialWorldSettings()
     // to set mailtimer to return mails every day between 4 and 5 am
     // mailtimer is increased when updating auctions
     // one second is 1000 -(tested on win system)
-    mail_timer = uint32((((localtime(&m_gameTime)->tm_hour + 20) % 24) * HOUR * IN_MILLISECONDS) / m_timers[WUPDATE_AUCTIONS].GetInterval());
+    mail_timer = uint32(((static_cast<long long>((localtime(&m_gameTime)->tm_hour + 20) % 24)) * HOUR * IN_MILLISECONDS) / m_timers[WUPDATE_AUCTIONS].GetInterval());
     // 1440
-    mail_timer_expires = uint32((DAY * IN_MILLISECONDS) / (m_timers[WUPDATE_AUCTIONS].GetInterval()));
+    mail_timer_expires = uint32((static_cast<long long>(DAY) * IN_MILLISECONDS) / (m_timers[WUPDATE_AUCTIONS].GetInterval()));
     DEBUG_LOG("Mail timer set to: %u, mail return is called every %u minutes", mail_timer, mail_timer_expires);
 
     ///- Initialize static helper structures
@@ -1668,6 +1657,17 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading WorldState");
     sWorldState.Load();
     sLog.outString();
+
+#ifdef BUILD_ELUNA
+    if (sElunaConfig->IsElunaEnabled())
+    {
+        ///- Run eluna scripts.
+        sLog.outString("Starting Eluna world state...");
+        // use map id -1 for the global Eluna state
+        eluna = std::make_unique<Eluna>(nullptr);
+        sLog.outString();
+    }
+#endif
 
 #ifdef BUILD_METRICS
     // update metrics output every second
@@ -2210,7 +2210,7 @@ BanReturn World::BanAccount(WorldSession *session, uint32 duration_secs, const s
 }
 
 /// Ban an account or ban an IP address, duration_secs if it is positive used, otherwise permban
-BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_secs, std::string reason, const std::string& author)
+BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_secs, std::string reason, const std::string& author) const
 {
     LoginDatabase.escape_string(nameOrIP);
     LoginDatabase.escape_string(reason);
@@ -2356,7 +2356,7 @@ void World::ShutdownServ(uint32 time, uint32 options, uint8 exitcode)
 }
 
 /// Display a shutdown message to the user(s)
-void World::ShutdownMsg(bool show /*= false*/, Player* player /*= nullptr*/)
+void World::ShutdownMsg(bool show /*= false*/, Player* player /*= nullptr*/) const
 {
     // not show messages for idle shutdown mode
     if (m_ShutdownMask & SHUTDOWN_MASK_IDLE)
@@ -2537,7 +2537,7 @@ void World::InitWeeklyQuestResetTime()
     localTm.tm_min = 0;
     localTm.tm_sec = 0;
     time_t nextWeekResetTime = mktime(&localTm);
-    nextWeekResetTime -= week_day_offset * DAY;             // move time to proper day
+    nextWeekResetTime -= static_cast<long long>(week_day_offset) * DAY;             // move time to proper day
 
     // next reset time before current moment
     if (curTime >= nextWeekResetTime)
@@ -3097,7 +3097,7 @@ void World::LoadGraveyardZones()
                 "skipped.", safeLocId, locId, linkKind);
         else
         {
-            GraveYardData data;
+            GraveYardData data{};
             data.safeLocId = safeLocId;
             data.team = Team(team);
             graveyardMap.insert(GraveYardMap::value_type(locKey, data));

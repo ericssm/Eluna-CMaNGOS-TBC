@@ -69,16 +69,17 @@ struct TimeBeginRAII
 /// Heartbeat for the World
 void WorldRunnable::run()
 {
-	TimeBeginRAII raii;
-	
+    TimeBeginRAII raii;
+
+    ///- Init new SQL thread for the world database
+    WorldDatabase.ThreadStart();                            // let thread do safe mySQL requests (one connection call enough)
+    sWorld.InitResultQueue();
+    
 #ifdef BUILD_ELUNA
     if(Eluna* e = sWorld.GetEluna())
         e->OnStartup();
 #endif
 	
-    ///- Init new SQL thread for the world database
-    WorldDatabase.ThreadStart();                            // let thread do safe mySQL requests (one connection call enough)
-    sWorld.InitResultQueue();
 
     uint32 diffTick = WorldTimer::tick(); // initialize world timer vars
     uint32 diffTime = 0; // used to compute real time elapsed in World::Update()

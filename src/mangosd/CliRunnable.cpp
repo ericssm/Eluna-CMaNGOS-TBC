@@ -34,7 +34,7 @@
 #include "Entities/Player.h"
 #include "Chat/Chat.h"
 
-void utf8print(const char* str)
+static void utf8print(const char* str)
 {
 #if PLATFORM == PLATFORM_WINDOWS
     std::wstring wtemp_buf;
@@ -57,7 +57,7 @@ void utf8print(const char* str)
 #endif
 }
 
-void commandFinished(bool)
+static void commandFinished(bool)
 {
     printf("mangos>");
     fflush(stdout);
@@ -376,7 +376,7 @@ bool ChatHandler::HandleCharacterDeletedDeleteCommand(char* args)
  *
  * @param args the search string which either contains a player GUID or a part of the character-name
  */
-bool ChatHandler::HandleCharacterDeletedOldCommand(char* args)
+bool ChatHandler::HandleCharacterDeletedOldCommand(char* args) const
 {
     int32 keepDays = sWorld.getConfig(CONFIG_UINT32_CHARDELETE_KEEP_DAYS);
 
@@ -560,7 +560,7 @@ bool ChatHandler::HandleServerLogLevelCommand(char* args)
 
 #ifdef __unix__
 // Non-blocking keypress detector, when return pressed, return 1, else always return 0
-int kb_hit_return()
+static int kb_hit_return()
 {
     struct timeval tv;
     fd_set fds;
