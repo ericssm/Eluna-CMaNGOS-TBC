@@ -376,7 +376,7 @@ bool ChatHandler::HandleCharacterDeletedDeleteCommand(char* args)
  *
  * @param args the search string which either contains a player GUID or a part of the character-name
  */
-bool ChatHandler::HandleCharacterDeletedOldCommand(char* args) const
+bool ChatHandler::HandleCharacterDeletedOldCommand(char* args)
 {
     int32 keepDays = sWorld.getConfig(CONFIG_UINT32_CHARDELETE_KEEP_DAYS);
 
