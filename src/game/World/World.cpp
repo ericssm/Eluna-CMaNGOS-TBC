@@ -152,7 +152,6 @@ World::World() : mail_timer(0), mail_timer_expires(0), m_NextDailyQuestReset(0),
 World::~World()
 {
     // it is assumed that no other thread is accessing this data when the destructor is called.  therefore, no locks are necessary
-
     ///- Empty the kicked session set
     for (auto const& session : m_sessions)
         delete session.second;
@@ -287,6 +286,7 @@ World::AddSession_(WorldSession* s)
         float popu = float(GetActiveSessionCount());        // updated number of users on the server
         popu /= pLimit;
         popu *= 2;
+
 
         static SqlStatementID id;
 
@@ -1606,6 +1606,17 @@ void World::SetInitialWorldSettings()
     sMapMgr.Initialize();
     sLog.outString();
 
+#ifdef BUILD_ELUNA
+    if (sElunaConfig->IsElunaEnabled())
+    {
+        ///- Run eluna scripts.
+        sLog.outString("Starting Eluna world state...");
+        // use map id -1 for the global Eluna state
+        eluna = std::make_unique<Eluna>(nullptr);
+        sLog.outString();
+    }
+#endif
+
     ///- Initialize Battlegrounds
     sLog.outString("Starting BattleGround System");
     sBattleGroundMgr.CreateInitialBattleGrounds();
@@ -1658,16 +1669,7 @@ void World::SetInitialWorldSettings()
     sWorldState.Load();
     sLog.outString();
 
-#ifdef BUILD_ELUNA
-    if (sElunaConfig->IsElunaEnabled())
-    {
-        ///- Run eluna scripts.
-        sLog.outString("Starting Eluna world state...");
-        // use map id -1 for the global Eluna state
-        eluna = std::make_unique<Eluna>(nullptr);
-        sLog.outString();
-    }
-#endif
+
 
 #ifdef BUILD_METRICS
     // update metrics output every second
