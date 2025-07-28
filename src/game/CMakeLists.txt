@@ -134,6 +134,7 @@ target_link_libraries(${LIBRARY_NAME}
   PRIVATE Detour
   PRIVATE zlib
   PRIVATE lualib
+  cmangos-compile-option-interface
 )
 
 # TO DO: Remove this if when old playerbots get removed

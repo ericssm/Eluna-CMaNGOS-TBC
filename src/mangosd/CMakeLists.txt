@@ -61,6 +61,7 @@ target_link_libraries(${EXECUTABLE_NAME}
   game
   gsoap
   lualib
+  cmangos-compile-option-interface
 )
 
 if(WIN32)
