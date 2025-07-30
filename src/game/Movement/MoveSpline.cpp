@@ -171,7 +171,7 @@ namespace Movement
         return false;\
     }
         CHECK(path.size() > 1);
-        //CHECK(velocity > 0.f);
+        CHECK(velocity > 0.f);
         // CHECK(_checkPathBounds());
         return true;
 #undef CHECK
