@@ -34,7 +34,7 @@
 #include "Entities/Player.h"
 #include "Chat/Chat.h"
 
-static void utf8print(const char* str)
+void utf8print(const char* str)
 {
 #if PLATFORM == PLATFORM_WINDOWS
     std::wstring wtemp_buf;
@@ -57,7 +57,7 @@ static void utf8print(const char* str)
 #endif
 }
 
-static void commandFinished(bool)
+void commandFinished(bool)
 {
     printf("mangos>");
     fflush(stdout);
@@ -560,7 +560,7 @@ bool ChatHandler::HandleServerLogLevelCommand(char* args)
 
 #ifdef __unix__
 // Non-blocking keypress detector, when return pressed, return 1, else always return 0
-static int kb_hit_return()
+int kb_hit_return()
 {
     struct timeval tv;
     fd_set fds;

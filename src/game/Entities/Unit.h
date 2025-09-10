@@ -1721,6 +1721,17 @@ class Unit : public WorldObject
             return false;
         }
 
+        template <typename Func>
+        bool HasAuraHolder(uint32 spellId, Func func) const
+        {
+            SpellAuraHolderConstBounds spair = GetSpellAuraHolderBounds(spellId);
+            for (SpellAuraHolderMap::const_iterator i_holder = spair.first; i_holder != spair.second; ++i_holder)
+                if (func(i_holder->second))
+                    return true;
+
+            return false;
+        }
+
         template<typename Func>
         bool HasAura(Func func, AuraType type) const
         {
@@ -1834,6 +1845,7 @@ class Unit : public WorldObject
         bool IsMovingIgnoreFlying() const { return m_movementInfo.HasMovementFlag(movementFlagsIgnoreFlyingMask); }
         bool IsMovingForward() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_MASK_MOVING_FORWARD); }
         bool IsLevitating() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING); }
+        bool IsHovering() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_HOVER); }
         bool IsWalking() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_WALK_MODE); }
         bool IsRooted() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_ROOT); }
         bool IsJumping() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_JUMPING); }

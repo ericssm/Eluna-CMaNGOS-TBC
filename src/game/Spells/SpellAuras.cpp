@@ -2038,14 +2038,6 @@ void Aura::TriggerSpell()
     {
         CastTriggeredSpell(data);
     }
-    else if (!GetAuraScript()) // if scripter scripted spell, it is handled somehow
-    {
-        if (Unit* caster = GetCaster())
-        {
-            if (triggerTarget->GetTypeId() != TYPEID_UNIT || !sScriptDevAIMgr.OnEffectDummy(caster, GetId(), GetEffIndex(), (Creature*)triggerTarget, ObjectGuid()))
-                sLog.outError("Aura::TriggerSpell: Spell %u have 0 in EffectTriggered[%d], not handled custom case?", GetId(), GetEffIndex());
-        }
-    }
 }
 
 void Aura::TriggerSpellWithValue()
@@ -2872,12 +2864,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     }
                     return;
                 }
-                case 40131:
-                    if (apply)
-                        target->m_AuraFlags |= UNIT_AURAFLAG_ALIVE_INVISIBLE;
-                    else
-                        target->m_AuraFlags &= ~UNIT_AURAFLAG_ALIVE_INVISIBLE;
-                    return;
             }
             break;
         }
@@ -3022,10 +3008,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 player->RemoveAurasDueToSpell(spellId);
         }
     }
-
-    // script has to "handle with care", only use where data are not ok to use in the above code.
-    if (target->GetTypeId() == TYPEID_UNIT)
-        sScriptDevAIMgr.OnAuraDummy(this, apply);
 }
 
 void Aura::HandleAuraMounted(bool apply, bool Real)
@@ -7435,12 +7417,6 @@ void Aura::PeriodicDummyTick()
     }
 
     OnPeriodicDummy();
-
-    if (Unit* caster = GetCaster())
-    {
-        if (target && target->GetTypeId() == TYPEID_UNIT)
-            sScriptDevAIMgr.OnEffectDummy(caster, GetId(), GetEffIndex(), (Creature*)target, ObjectGuid());
-    }
 }
 
 void Aura::HandlePreventFleeing(bool apply, bool Real)

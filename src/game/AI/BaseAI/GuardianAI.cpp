@@ -27,6 +27,15 @@ GuardianAI::GuardianAI(Creature* creature) : CreatureEventAI(creature)
     Unit* owner = creature->GetOwner();
     MANGOS_ASSERT(owner);
     m_defaultMovement = FOLLOW_MOTION_TYPE;
+    m_followAngle = M_PI_F / 2;
+    m_followDist = 1.5f;
+
+    switch (creature->GetUInt32Value(UNIT_CREATED_BY_SPELL))
+    {
+        case 11939: // Thule Ravenclaw - Imp
+            m_followDist = 3.f;
+            break;
+    }
 }
 
 void GuardianAI::JustRespawned()
