@@ -133,7 +133,6 @@ target_link_libraries(${LIBRARY_NAME}
   PRIVATE g3dlite
   PRIVATE Detour
   PRIVATE zlib
-  PRIVATE lualib
   cmangos-compile-option-interface
 )
 

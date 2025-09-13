@@ -32,7 +32,6 @@
 
 #ifdef BUILD_ELUNA
 #include "LuaEngine/LuaEngine.h"
-#include "LuaEngine/ElunaConfig.h"
 #endif
 
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<MapManager, std::recursive_mutex>
@@ -59,6 +58,7 @@ void MapManager::Initialize()
     CreateContinents();
 
     int num_threads(sWorld.getConfig(CONFIG_UINT32_NUM_MAP_THREADS));
+
     if (num_threads > 0)
         m_updater.activate(num_threads);
 }

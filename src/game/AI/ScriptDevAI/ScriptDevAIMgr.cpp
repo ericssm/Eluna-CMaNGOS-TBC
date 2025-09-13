@@ -479,29 +479,6 @@ bool ScriptDevAIMgr::OnItemLoot(Player* pPlayer, Item* pItem, bool apply)
     return pTempScript->pItemLoot(pPlayer, pItem, apply);
 }
 
-bool ScriptDevAIMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid)
-{
-    Script* pTempScript = GetScript(pTarget->GetScriptId());
-#ifdef BUILD_ELUNA
-    if (Eluna* e = pCaster->GetEluna())
-        e->OnDummyEffect(pCaster, spellId, effIndex, pTarget);
-#endif
-    if (!pTempScript || !pTempScript->pEffectDummyNPC)
-        return false;
-
-    return pTempScript->pEffectDummyNPC(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
-}
-
-bool ScriptDevAIMgr::OnAuraDummy(Aura const* pAura, bool bApply)
-{
-    Script* pTempScript = GetScript(((Creature*)pAura->GetTarget())->GetScriptId());
-
-    if (!pTempScript || !pTempScript->pEffectAuraDummy)
-        return false;
-
-    return pTempScript->pEffectAuraDummy(pAura, bApply);
-}
-
 InstanceData* ScriptDevAIMgr::CreateInstanceData(Map* pMap)
 {
     Script* pTempScript = GetScript(pMap->GetScriptId());

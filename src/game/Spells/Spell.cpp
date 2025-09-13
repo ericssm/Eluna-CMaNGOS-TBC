@@ -3381,7 +3381,6 @@ SpellCastResult Spell::cast(bool skipCheck)
 #endif
 
     m_duration = CalculateSpellDuration(m_spellInfo, m_caster, nullptr, m_auraScript);
-
     FillTargetMap();
 
     if (m_spellState == SPELL_STATE_FINISHED)               // stop cast if spell marked as finish somewhere in FillTargetMap

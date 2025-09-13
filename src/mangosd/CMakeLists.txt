@@ -60,7 +60,6 @@ target_link_libraries(${EXECUTABLE_NAME}
   shared
   game
   gsoap
-  lualib
   cmangos-compile-option-interface
 )
 

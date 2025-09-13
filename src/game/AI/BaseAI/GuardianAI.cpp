@@ -81,18 +81,6 @@ int GuardianAI::Permissible(const Creature* creature)
     return PERMIT_BASE_NO;
 }
 
-void GuardianAI::CombatStop()
-{
-    Unit* owner = m_creature->GetOwner();
-
-    if (!owner || !m_creature->IsInWorld())
-        return;
-
-    // only alive creatures that are not on transport can return to home position
-    if (m_creature->IsAlive() && !m_creature->IsBoarded() && GetDefaultMovement() == FOLLOW_MOTION_TYPE)
-        m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-}
-
 void GuardianAI::JustDied(Unit* killer)
 {
     CreatureEventAI::JustDied(killer);

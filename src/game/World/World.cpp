@@ -288,7 +288,6 @@ World::AddSession_(WorldSession* s)
         popu /= pLimit;
         popu *= 2;
 
-
         static SqlStatementID id;
 
         SqlStatement stmt = LoginDatabase.CreateStatement(id, "UPDATE realmlist SET population = ? WHERE id = ?");
@@ -1162,9 +1161,6 @@ void World::SetInitialWorldSettings()
     sLog.outString();
 
 #ifdef BUILD_ELUNA
-    // lua state begins uninitialized
-    eluna = nullptr;
-    
     sLog.outString("Loading Eluna config...");
     sElunaConfig->Initialize();
 
@@ -1538,6 +1534,18 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading GM tickets...");
     sTicketMgr.LoadGMTickets();
 
+#ifdef BUILD_ELUNA
+    if (sElunaConfig->IsElunaEnabled())
+    {
+        ///- Run eluna scripts.
+        sLog.outString("Starting Eluna world state...");
+        // use map id -1 for the global Eluna state
+        m_elunaInfo = {ElunaInfoKey::MakeGlobalKey(0)};
+        sElunaMgr->Create(nullptr, m_elunaInfo);
+        sLog.outString();
+    }
+#endif
+
     ///- Load and initialize EventAI Scripts
     sLog.outString("Loading CreatureEventAI Summons...");
     sEventAIMgr.LoadCreatureEventAI_Summons(false);         // false, will checked in LoadCreatureEventAI_Scripts
@@ -1600,32 +1608,20 @@ void World::SetInitialWorldSettings()
     ///- Initialize Outdoor PvP
     sLog.outString("Starting Outdoor PvP System");          // should be before loading maps
     sOutdoorPvPMgr.InitOutdoorPvP();
-    sLog.outString();
 
     ///- Initialize MapManager
     sLog.outString("Starting Map System");
     sMapMgr.Initialize();
     sLog.outString();
 
-#ifdef BUILD_ELUNA
-    if (sElunaConfig->IsElunaEnabled())
-    {
-        ///- Run eluna scripts.
-        sLog.outString("Starting Eluna world state...");
-        // use map id -1 for the global Eluna state
-        eluna = std::make_unique<Eluna>(nullptr);
-        sLog.outString();
-    }
-#endif
-
     ///- Initialize Battlegrounds
     sLog.outString("Starting BattleGround System");
     sBattleGroundMgr.CreateInitialBattleGrounds();
     m_bgQueue.InitAutomaticArenaPointDistribution();
     CheckLootTemplates_Reference(ids_set);
-    sLog.outString();
 
     sLog.outString("Deleting expired bans...");
+
     LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=" _UNIXTIME_ " AND expires_at<>banned_at");
     sLog.outString();
 
@@ -1669,8 +1665,6 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading WorldState");
     sWorldState.Load();
     sLog.outString();
-
-
 
 #ifdef BUILD_METRICS
     // update metrics output every second
@@ -2213,7 +2207,7 @@ BanReturn World::BanAccount(WorldSession *session, uint32 duration_secs, const s
 }
 
 /// Ban an account or ban an IP address, duration_secs if it is positive used, otherwise permban
-BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_secs, std::string reason, const std::string& author) const
+BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_secs, std::string reason, const std::string& author)
 {
     LoginDatabase.escape_string(nameOrIP);
     LoginDatabase.escape_string(reason);
@@ -2359,7 +2353,7 @@ void World::ShutdownServ(uint32 time, uint32 options, uint8 exitcode)
 }
 
 /// Display a shutdown message to the user(s)
-void World::ShutdownMsg(bool show /*= false*/, Player* player /*= nullptr*/) const
+void World::ShutdownMsg(bool show /*= false*/, Player* player /*= nullptr*/)
 {
     // not show messages for idle shutdown mode
     if (m_ShutdownMask & SHUTDOWN_MASK_IDLE)

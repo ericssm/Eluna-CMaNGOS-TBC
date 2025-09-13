@@ -32,6 +32,9 @@
 #include "Globals/GraveyardManager.h"
 #include "LFG/LFGQueue.h"
 #include "BattleGround/BattleGroundQueue.h"
+#ifdef BUILD_ELUNA
+#include "LuaEngine/ElunaMgr.h"
+#endif
 
 #include <atomic>
 #include <set>
@@ -679,7 +682,7 @@ class World
         bool IsShutdowning() const { return m_ShutdownTimer > 0; }
         void ShutdownServ(uint32 time, uint32 options, uint8 exitcode);
         void ShutdownCancel();
-        void ShutdownMsg(bool show = false, Player* player = nullptr) const;
+        void ShutdownMsg(bool show = false, Player* player = nullptr);
         static uint8 GetExitCode() { return m_ExitCode; }
         static void StopNow(uint8 exitcode) { m_stopEvent = true; m_ExitCode = exitcode; }
         static bool IsStopped() { return m_stopEvent; }
@@ -718,7 +721,7 @@ class World
         void KickAll(bool save);
         void KickAllLess(AccountTypes sec);
         void WarnAccount(uint32 accountId, std::string from, std::string reason, const char* type = "WARNING");
-        BanReturn BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_secs, std::string reason, const std::string& author) const;
+        BanReturn BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_secs, std::string reason, const std::string& author);
         BanReturn BanAccount(WorldSession *session, uint32 duration_secs, const std::string& reason, const std::string& author);
         bool RemoveBanAccount(BanMode mode, const std::string& source, const std::string& message, std::string nameOrIP);
 
@@ -793,8 +796,7 @@ class World
         void StartBGQueueThread();
 
 #ifdef BUILD_ELUNA
-        Eluna* GetEluna() const { return eluna.get(); }
-        std::unique_ptr<Eluna> eluna;
+        Eluna* GetEluna() const { return sElunaMgr->Get(m_elunaInfo); }
 #endif
     protected:
         void _UpdateGameTime();
@@ -929,6 +931,10 @@ class World
         std::thread m_lfgQueueThread;
         BattleGroundQueue m_bgQueue;
         std::thread m_bgQueueThread;
+
+#ifdef BUILD_ELUNA
+        ElunaInfo m_elunaInfo;
+#endif
 };
 
 extern uint32 realmID;
