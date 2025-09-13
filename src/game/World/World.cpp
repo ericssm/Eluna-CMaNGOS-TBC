@@ -1534,18 +1534,6 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading GM tickets...");
     sTicketMgr.LoadGMTickets();
 
-#ifdef BUILD_ELUNA
-    if (sElunaConfig->IsElunaEnabled())
-    {
-        ///- Run eluna scripts.
-        sLog.outString("Starting Eluna world state...");
-        // use map id -1 for the global Eluna state
-        m_elunaInfo = {ElunaInfoKey::MakeGlobalKey(0)};
-        sElunaMgr->Create(nullptr, m_elunaInfo);
-        sLog.outString();
-    }
-#endif
-
     ///- Load and initialize EventAI Scripts
     sLog.outString("Loading CreatureEventAI Summons...");
     sEventAIMgr.LoadCreatureEventAI_Summons(false);         // false, will checked in LoadCreatureEventAI_Scripts
@@ -1613,6 +1601,18 @@ void World::SetInitialWorldSettings()
     sLog.outString("Starting Map System");
     sMapMgr.Initialize();
     sLog.outString();
+
+#ifdef BUILD_ELUNA
+    if (sElunaConfig->IsElunaEnabled())
+    {
+        ///- Run eluna scripts.
+        sLog.outString("Starting Eluna world state...");
+        // use map id -1 for the global Eluna state
+        m_elunaInfo = {ElunaInfoKey::MakeGlobalKey(0)};
+        sElunaMgr->Create(nullptr, m_elunaInfo);
+        sLog.outString();
+    }
+#endif
 
     ///- Initialize Battlegrounds
     sLog.outString("Starting BattleGround System");
