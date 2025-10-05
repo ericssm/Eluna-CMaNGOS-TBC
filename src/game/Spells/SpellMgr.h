@@ -1694,7 +1694,7 @@ inline bool IsNeedCastSpellAtFormApply(SpellEntry const* spellInfo, ShapeshiftFo
         return false;
 
     // passive spells with SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT are already active without shapeshift, do no recast!
-    return (spellInfo->Stances & (1 << (form - 1)) && !spellInfo->HasAttribute(SPELL_ATTR_EX2_ALLOW_WHILE_NOT_SHAPESHIFTED));
+    return (spellInfo->CanBeUsedInForm(form) && !spellInfo->HasAttribute(SPELL_ATTR_EX2_ALLOW_WHILE_NOT_SHAPESHIFTED));
 }
 
 inline bool IsNeedCastSpellAtOutdoor(SpellEntry const* spellInfo)
@@ -2278,8 +2278,6 @@ inline bool IsProfessionOrRidingSkill(uint32 skill)
     return  IsProfessionSkill(skill) || skill == SKILL_RIDING;
 }
 
-typedef std::vector<std::unique_ptr<SpellEntry>> SpellEntryMap;
-
 class SpellMgr
 {
         friend struct DoSpellProcEvent;
@@ -2723,9 +2721,6 @@ class SpellMgr
         void LoadSpellPetAuras();
         void LoadSpellAreas();
 
-        SpellEntry const* GetSpellEntry(uint32 spellId) const { return spellId < GetMaxSpellId() ? mSpellEntryMap[spellId].get() : nullptr; }
-        uint32 GetMaxSpellId() const { return mSpellEntryMap.size(); }
-
     private:
         SpellChainMap      mSpellChains;
         SpellChainMapNext  mSpellChainsNext;
@@ -2744,8 +2739,6 @@ class SpellMgr
         SpellAreaMap         mSpellAreaMap;
         SpellAreaForAuraMap  mSpellAreaForAuraMap;
         SpellAreaForAreaMap  mSpellAreaForAreaMap;
-
-        SpellEntryMap      mSpellEntryMap;
 };
 
 #define sSpellMgr SpellMgr::Instance()
