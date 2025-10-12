@@ -1015,9 +1015,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
 #ifdef BUILD_ELUNA
     // used by eluna
-#ifdef ENABLE_PLAYERBOTS
-    if (pCurrChar->isRealPlayer())
-#endif
     if (Eluna* e = sWorld.GetEluna())
         e->OnLogin(pCurrChar);
 #endif
