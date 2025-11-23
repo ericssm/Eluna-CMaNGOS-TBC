@@ -586,8 +586,13 @@ struct ItemPrototype
 
         return false;
     }
+	bool IsCurrencyToken() const { return BagFamily & BAG_FAMILY_MASK_CURRENCY_TOKENS; }
 
-    bool IsCurrencyToken() const { return BagFamily & BAG_FAMILY_MASK_CURRENCY_TOKENS; }
+    constexpr bool HasCreator() const
+    {
+        constexpr uint32 ITEM_HEARTHSTONE_ID = 6948;
+        return Stackable <= 1 && Class != ITEM_CLASS_CONSUMABLE && Class != ITEM_CLASS_QUEST && !(Flags & ITEM_FLAG_NO_CREATOR) && ItemId != ITEM_HEARTHSTONE_ID;
+    }
 
     uint32 GetMaxStackSize() const { return Stackable; }
 
