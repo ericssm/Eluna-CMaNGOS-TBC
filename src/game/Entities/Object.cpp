@@ -2094,14 +2094,14 @@ void WorldObject::AddToWorld()
         events.reset();
 
     if (Eluna* e = m_currMap->GetEluna())
-        events = std::make_unique<ElunaEventProcessor>(e, this);
+        events = std::make_unique<ElunaEventProcessor>((EventMgr*)&e->eventMgr, this);
 
     // create the World events processor
     if (Eluna* e = sWorld.GetEluna())
     {
         auto& events = GetElunaEvents(-1);
         if (!events)
-            events = std::make_unique<ElunaEventProcessor>(e, this);
+            events = std::make_unique<ElunaEventProcessor>((EventMgr*)&e->eventMgr, this);
     }
 #endif
 }
