@@ -8241,8 +8241,8 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
         AuraList const& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
         for (auto i : mModDamagePercentDone)
         {
-            if (i->GetModifier()->m_miscvalue & schoolMask &&                         // schoolmask has to fit with the intrinsic spell school
-                i->GetModifier()->m_miscvalue & GetMeleeDamageSchoolMask(attType == BASE_ATTACK) &&         // AND schoolmask has to fit with weapon damage school (essential for non-physical spells)
+            if (i->GetModifier()->m_miscvalue & schoolMask &&                         // schoolmask has to fit with the intrinsic spellInfo school
+                i->GetModifier()->m_miscvalue & spellInfo->SchoolMask &&              // AND schoolmask has to fit with spell damage school (essential for non-physical spells)
                     ((i->GetSpellProto()->EquippedItemClass == -1) ||                     // general, weapon independent
                      (pWeapon && pWeapon->IsFitToSpellRequirements(i->GetSpellProto()))))  // OR used weapon fits aura requirements
             {
@@ -11663,8 +11663,11 @@ void Unit::KnockBackWithAngle(float angle, float horizontalSpeed, float vertical
     {
         if (Player const* player = GetControllingPlayer())
         {
-            player->GetSession()->SendKnockBack(this, angle, horizontalSpeed, verticalSpeed);
-            return;
+            if (player->GetMover() == this)
+            {
+                player->GetSession()->SendKnockBack(this, angle, horizontalSpeed, verticalSpeed);
+                return;
+            }
         }
     }
 
@@ -12110,6 +12113,24 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
 
     // return the creature therewith the summoner has access to it
     return possessed;
+}
+
+void Unit::SendMessageToAllWhoSeeMeMove(WorldPacket const& data, ObjectGuid moverOwner) const
+{
+    if (IsInWorld())
+    {
+        GuidSet const& clientGuidsIAmAt = GetClientGuidsIAmAt();
+        for (ObjectGuid guid : clientGuidsIAmAt)
+        {
+            if (moverOwner == guid)
+                continue;
+            if (Player* player = GetMap()->GetPlayer(guid))
+                player->GetSession()->SendPacket(data);
+        }
+
+        if (IsPlayer() && moverOwner != GetObjectGuid())
+            static_cast<Player const*>(this)->GetSession()->SendPacket(data);
+    }
 }
 
 bool Unit::TakePossessOf(Unit* possessed)
