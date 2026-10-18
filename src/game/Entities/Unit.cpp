@@ -336,14 +336,14 @@ Unit::Unit() :
     m_regenTimer(0),
     m_combatData(new CombatData(this)),
     m_combatManager(this),
+    m_hasPeriodicAura(false),
     m_guardianPetsIterator(m_guardianPets.end()),
     m_spellUpdateHappening(false),
     m_spellProcsHappening(false),
     m_hasHeartbeatProcCounter(0),
     m_ignoreRangedTargets(false),
     m_auraUpdateMask(0),
-    m_isMountOverriden(false), m_overridenMountId(0),
-    m_hasPeriodicAura(false)
+    m_isMountOverriden(false), m_overridenMountId(0)
 {
     m_objectType |= TYPEMASK_UNIT;
     m_objectTypeId = TYPEID_UNIT;
@@ -5448,7 +5448,8 @@ void Unit::RemoveAurasDueToSpellBySteal(SpellAuraHolder* holder, Unit* stealer)
     // max duration 2 minutes (in msecs)
     int32 dur = holder->GetAuraDuration();
     int32 max_dur = 2 * MINUTE * IN_MILLISECONDS;
-    int32 new_max_dur = max_dur > dur ? dur : max_dur;
+    // permanent auras (duration -1) must also be capped
+    int32 new_max_dur = (dur >= 0 && dur < max_dur) ? dur : max_dur;
     new_holder->SetAuraMaxDuration(new_max_dur);
     new_holder->SetAuraDuration(new_max_dur);
 
@@ -5758,7 +5759,7 @@ void Unit::RemoveSpellAuraHolder(SpellAuraHolder* holder, AuraRemoveMode mode)
     holder->_RemoveSpellAuraHolder();
 
     if (mode != AURA_REMOVE_BY_DELETE)
-        holder->HandleSpellSpecificBoosts(false);
+        holder->HandleSpellSpecificBoosts(false, mode);
 
     if (statue)
         statue->UnSummon();
@@ -12650,7 +12651,7 @@ void Unit::Uncharm(Unit* charmed, uint32 /*spellId*/)
 void Unit::RemoveUnattackableTargets(Unit* charmer)
 {
     // first find friendly target (stopping combat here is not recommended because m_attackers will be modified)
-    AttackerSet friendlyTargets;
+    std::set<std::pair<Unit*, float>> friendlyTargets;
     for (auto itr = getAttackers().begin(); itr != getAttackers().end(); ++itr)
     {
         Unit* attacker = (*itr);
@@ -12658,7 +12659,7 @@ void Unit::RemoveUnattackableTargets(Unit* charmer)
             continue;
 
         if (CanAttack(attacker))
-            friendlyTargets.insert(attacker);
+            friendlyTargets.insert({attacker, 0.f});
     }
 
     for (auto itr = getThreatManager().getThreatList().begin(); itr != getThreatManager().getThreatList().end(); ++itr)
@@ -12668,16 +12669,16 @@ void Unit::RemoveUnattackableTargets(Unit* charmer)
             continue;
 
         if (!CanAttack(attacker))
-            friendlyTargets.insert(attacker);
+            friendlyTargets.insert({attacker, (*itr)->getThreat()});
     }
 
     // now stop attackers combat and transfer threat generated from this to owner, also get the total generated threat
-    for (auto attacker : friendlyTargets)
+    for (auto&[attacker, threat] : friendlyTargets)
     {
         attacker->AttackStop(true, true);
         attacker->getThreatManager().modifyThreatPercent(this, -101);     // only remove the possessed creature from threat list because it can be filled by other players
         if (charmer && IsPropagatingThreatToOwner())
-            attacker->AddThreat(charmer);
+            attacker->AddThreat(charmer, threat);
     }
 }
 
